@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Invitación interactiva de cumpleaños temática Pokémon con Charizard en 3D.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%23e3352b'/%3E%3Cpath d='M2.2 12h19.6' stroke='%2315161c' stroke-width='2.6'/%3E%3Ccircle cx='12' cy='12' r='3.4' fill='%23f2f2ee' stroke='%2315161c' stroke-width='1.6'/%3E%3C/svg%3E">
+<title>Cumpleaños Legendario · Charizard</title>
+</head>
+<body>
+
+<!-- Fondo base: nunca un lienzo negro, siempre hay composición CSS -->
+<div class="bg-base" aria-hidden="true"></div>
+
+<!-- Lienzo 3D fijo -->
+<canvas id="gl" aria-hidden="true"></canvas>
+
+<!-- Viñeta y grano -->
+<div class="vignette" aria-hidden="true"></div>
+
+<!-- Cursor con glow -->
+<div class="cursor" id="cursor" aria-hidden="true"></div>
+
+<!-- Capa de etiquetas Pokédex -->
+<svg id="label-lines" aria-hidden="true"></svg>
+<div id="labels" aria-hidden="true"></div>
+
+<!-- Pantalla de carga -->
+<div class="loader" id="loader">
+  <div class="loader-ball" aria-hidden="true"><span></span></div>
+  <p>Invocando a Charizard…</p>
+</div>
+
+<!-- Barra superior -->
+<header class="topbar">
+  <a class="brand" href="#hero" data-hover>
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M2.5 12h19" stroke="currentColor" stroke-width="2"/>
+      <circle cx="12" cy="12" r="3.2" fill="currentColor"/>
+    </svg>
+    <span>Poké·Fiesta</span>
+  </a>
+  <nav>
+    <a href="#fiesta" data-hover>La fiesta</a>
+    <a href="#galeria" data-hover>Diseños</a>
+    <a class="cta-mini" href="#rsvp" data-hover>Confirmar</a>
+  </nav>
+</header>
+
+<main id="scroll-content">
+
+  <!-- HERO -->
+  <section class="panel hero" id="hero">
+    <p class="kicker" data-parallax="0.35">Invitación interactiva</p>
+    <h1 data-parallax="0.2">
+      <span class="line">CUMPLEAÑOS</span>
+      <span class="line fire">LEGENDARIO</span>
+    </h1>
+    <p class="sub" data-parallax="0.5">Una fiesta de fuego con <strong>Charizard</strong> como invitado de honor.</p>
+    <div class="countdown" id="countdown" data-parallax="0.65" role="timer" aria-label="Cuenta regresiva para la fiesta">
+      <div><b data-cd="d">--</b><i>días</i></div>
+      <div><b data-cd="h">--</b><i>horas</i></div>
+      <div><b data-cd="m">--</b><i>min</i></div>
+      <div><b data-cd="s">--</b><i>seg</i></div>
+    </div>
+    <div class="scroll-hint" aria-hidden="true"><span></span>Desliza para despertar al dragón</div>
+  </section>
+
+  <!-- FASE ROTACIÓN -->
+  <section class="panel side right">
+    <div class="card" data-parallax="0.25">
+      <p class="kicker">Fase 01 · Giro completo</p>
+      <h2>Míralo de cerca</h2>
+      <p>Charizard gira 360° ante ti: alas desplegadas, cola encendida y garras listas. Sigue bajando y la ficha Pokédex lo analizará pieza por pieza.</p>
+    </div>
+  </section>
+
+  <!-- FASE POKÉDEX -->
+  <section class="panel side left" id="pokedex">
+    <div class="card" data-parallax="0.3">
+      <p class="kicker">Fase 02 · Ficha Pokédex</p>
+      <h2>N.º 006 · Tipo Fuego</h2>
+      <p>Escaneo en vivo: las etiquetas flotantes señalan sus armas legendarias. Dicen que si la llama de su cola se apaga, la fiesta no puede empezar.</p>
+    </div>
+  </section>
+
+  <!-- FASE FIESTA -->
+  <section class="panel center" id="fiesta">
+    <div class="stack">
+      <p class="kicker" data-parallax="0.2">Fase 03 · La misión</p>
+      <h2 data-parallax="0.15">Detalles de la fiesta</h2>
+      <div class="cards3">
+        <article class="card info" data-parallax="0.35">
+          <h3>Cuándo</h3>
+          <p class="big" data-config="fecha">—</p>
+          <p data-config="hora">—</p>
+        </article>
+        <article class="card info" data-parallax="0.5">
+          <h3>Dónde</h3>
+          <p class="big" data-config="lugar">—</p>
+          <p>Zona de batalla incluida</p>
+        </article>
+        <article class="card info" data-parallax="0.65">
+          <h3>Dress code</h3>
+          <p class="big">Tu mejor look de entrenador</p>
+          <p>Puntos extra si vienes de naranja</p>
+        </article>
+      </div>
+      <div class="stats card" data-parallax="0.4">
+        <h3>Nivel de fiesta garantizado</h3>
+        <div class="stat"><span>Fuego</span><div class="bar"><b style="--v:.95"></b></div><em>95</em></div>
+        <div class="stat"><span>Diversión</span><div class="bar"><b style="--v:1"></b></div><em>100</em></div>
+        <div class="stat"><span>Pastel</span><div class="bar"><b style="--v:.9"></b></div><em>90</em></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALERÍA -->
+  <section class="panel center tall" id="galeria">
+    <div class="stack">
+      <p class="kicker">Bonus · Arte de la fiesta</p>
+      <h2>Diseños de la colección</h2>
+      <p class="lede">Tres diseños creados para la ocasión: carteles, invitaciones y recuerdos. Toca cada uno para verlo en grande.</p>
+      <div class="gallery">
+        <button class="design" data-hover data-full="img/print_dragons.png" data-title="Tres generaciones de dragones">
+          <img src="img/print_dragons.png" alt="Diseño de la fiesta: tres dragones de fuego de distintos tamaños" loading="lazy">
+          <span>Tres generaciones de dragones</span>
+        </button>
+        <button class="design" data-hover data-full="img/print_flame_dragon.png" data-title="Dragón tribal de llamas">
+          <img src="img/print_flame_dragon.png" alt="Diseño de la fiesta: silueta de dragón formada por llamas" loading="lazy">
+          <span>Dragón tribal de llamas</span>
+        </button>
+        <button class="design" data-hover data-full="img/print_pokeball_cake.png" data-title="Pokéball pastelera">
+          <img src="img/print_pokeball_cake.png" alt="Diseño de la fiesta: pokéball convertida en pastel de cumpleaños" loading="lazy">
+          <span>Pokéball pastelera</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RSVP -->
+  <section class="panel center" id="rsvp">
+    <div class="stack">
+      <p class="kicker">Última fase · Elige tu respuesta</p>
+      <h2>¿Vienes a la batalla?</h2>
+      <p class="lede">Confirma tu asistencia y prepárate para una noche legendaria.</p>
+      <div class="actions">
+        <a class="btn fire" id="btn-wa" href="#" target="_blank" rel="noopener" data-hover>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2Zm5.5 14.2c-.2.7-1.3 1.3-1.9 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.6-1.2-3s.8-2.1 1-2.4c.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .6.5s.8 1.9.8 2c.1.1.1.3 0 .5-.3.6-.6.8-.4 1.1.7 1.2 1.6 2 2.8 2.6.3.2.5.1.7-.1l.9-1c.2-.3.4-.2.7-.1l2 .9c.3.2.5.2.6.4 0 .1 0 .7-.4 1.3Z"/></svg>
+          Confirmar por WhatsApp
+        </a>
+        <a class="btn ghost" id="btn-cal" href="#" target="_blank" rel="noopener" data-hover>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M7 2v2H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7Zm12 7v10H5V9h14ZM7 11h4v4H7v-4Z"/></svg>
+          Añadir al calendario
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="panel foot">
+    <p>Hecho con fuego y cariño para fans. Página privada de cumpleaños, sin fines comerciales.</p>
+    <p class="mini">Pokémon y Charizard son marcas de Nintendo · Creatures Inc. · Game Freak inc.</p>
+  </footer>
+
+</main>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Vista ampliada del diseño" hidden>
+  <button class="lb-close" id="lb-close" aria-label="Cerrar vista ampliada" data-hover>
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M5 5l14 14M19 5L5 19"/></svg>
+  </button>
+  <figure>
+    <img id="lb-img" src="" alt="">
+    <figcaption id="lb-cap"></figcaption>
+  </figure>
+</div>
+
+<!-- Fallback sin WebGL -->
+<div class="webgl-fallback" id="webgl-fallback" hidden>
+  <img src="img/print_dragons.png" alt="Ilustración de tres dragones de fuego">
+  <p>Tu navegador no pudo iniciar la escena 3D, pero la fiesta sigue en pie: toda la información está aquí abajo.</p>
+</div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
