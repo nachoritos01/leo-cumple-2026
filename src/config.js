@@ -1,17 +1,19 @@
 // ——— Datos editables de la fiesta ———
 // Cambia estos valores por los de tu evento y la página se actualiza sola.
 export const CONFIG = {
-  nombre: "Entrenador",                 // nombre del cumpleañero o cumpleañera
-  fechaTexto: "Sábado 20 de diciembre",
-  horaTexto: "17:00 h",
-  lugarTexto: "Salón Poké-Fiesta · Calle Roble 123",
-  fechaISO: "2026-12-20T17:00:00",      // para la cuenta regresiva
-  whatsapp: "5215500000000",            // número con código de país, solo dígitos
-  mensajeWA: "¡Hola! Confirmo mi asistencia al Cumpleaños Legendario. ¡Nos vemos en la batalla!",
+  nombre: "Leonardo Elian",
+  edad: "7 años",
+  fechaTexto: "Sábado 28 de noviembre",
+  horaTexto: "7:00 PM",
+  lugarTexto: "Calle 23 #344 x 4 y 6 Sur, Salvador Alvarado Sur",
+  mapaUrl: "https://maps.app.goo.gl/47V9D3dKdp9L6AmPA",
+  fechaISO: "2026-11-28T19:00:00",      // para la cuenta regresiva
+  whatsapp: "529993292271",             // +52 999 329 2271, código de país + 10 dígitos
+  mensajeWA: "¡Hola! Confirmo mi asistencia al cumpleaños de Leonardo Elian el sábado 28 de noviembre. ¡Nos vemos en la batalla!",
   calendario: {
-    titulo: "Cumpleaños Legendario · Charizard",
-    inicio: "20261220T170000",          // formato: AAAAMMDDTHHMMSS
-    fin: "20261220T210000",
-    detalles: "Fiesta temática Pokémon. Dress code: tu mejor look de entrenador.",
+    titulo: "Cumpleaños Pokémon de Leonardo Elian",
+    inicio: "20261128T190000",          // formato: AAAAMMDDTHHMMSS
+    fin: "20261128T230000",
+    detalles: "¡Leonardo Elian cumple 7 años! Fiesta temática Pokémon. ¡No llegues tarde! Te esperamos para atrapar mucha diversión ⚡",
   },
 };

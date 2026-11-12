@@ -16,13 +16,17 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 $('[data-config="fecha"]').textContent = CONFIG.fechaTexto;
 $('[data-config="hora"]').textContent = CONFIG.horaTexto;
 $('[data-config="lugar"]').textContent = CONFIG.lugarTexto;
+$$('[data-config="nombre"]').forEach((el) => (el.textContent = CONFIG.nombre));
+$$('[data-config="edad"]').forEach((el) => (el.textContent = CONFIG.edad));
+$('#btn-map').href = CONFIG.mapaUrl;
 
 $('#btn-wa').href = `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(CONFIG.mensajeWA)}`;
 const cal = CONFIG.calendario;
 $('#btn-cal').href =
   `https://calendar.google.com/calendar/render?action=TEMPLATE` +
   `&text=${encodeURIComponent(cal.titulo)}&dates=${cal.inicio}/${cal.fin}` +
-  `&details=${encodeURIComponent(cal.detalles)}`;
+  `&details=${encodeURIComponent(cal.detalles)}` +
+  `&location=${encodeURIComponent(CONFIG.lugarTexto)}`;
 
 // ——— Cuenta regresiva ———
 (() => {
@@ -192,6 +196,23 @@ $$('.design').forEach((btn) => btn.addEventListener('click', () => openLb(btn)))
 $('#lb-close').addEventListener('click', closeLb);
 lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLb(); });
 addEventListener('keydown', (e) => { if (e.key === 'Escape' && !lightbox.hidden) closeLb(); });
+
+// ——— Música ———
+(() => {
+  const audio = $('#music');
+  const btn = $('#music-btn');
+  const setState = (on) => {
+    btn.classList.toggle('on', on);
+    btn.setAttribute('aria-pressed', String(on));
+    btn.setAttribute('aria-label', on ? 'Detener música' : 'Reproducir música');
+  };
+  btn.addEventListener('click', async () => {
+    if (!audio.paused) { audio.pause(); return; }
+    try { await audio.play(); } catch (err) { console.error('No se pudo reproducir la música:', err); }
+  });
+  audio.addEventListener('play', () => setState(true));
+  audio.addEventListener('pause', () => setState(false));
+})();
 
 // ——— Cursor glow ———
 (() => {

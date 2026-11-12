@@ -3,9 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Invitación interactiva de cumpleaños temática Pokémon con Charizard en 3D.">
+<meta name="description" content="¡Leonardo Elian cumple 7 años! Únete a su fiesta Pokémon el sábado 28 de noviembre a las 7:00 PM. ¡Será una aventura inolvidable!">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nachoritos01.github.io/leo-cumple-2026/">
+<meta property="og:title" content="🎉 Invitación Cumpleaños Pokémon · Leonardo Elian">
+<meta property="og:description" content="¡Leonardo Elian cumple 7 años! Únete a su fiesta Pokémon el sábado 28 de noviembre a las 7:00 PM. ¡Será una aventura inolvidable!">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%23e3352b'/%3E%3Cpath d='M2.2 12h19.6' stroke='%2315161c' stroke-width='2.6'/%3E%3Ccircle cx='12' cy='12' r='3.4' fill='%23f2f2ee' stroke='%2315161c' stroke-width='1.6'/%3E%3C/svg%3E">
-<title>Cumpleaños Legendario · Charizard</title>
+<title>Estás invitado al cumple de Leonardo Elian</title>
 </head>
 <body>
 
@@ -43,7 +47,7 @@
   </a>
   <nav>
     <a href="#fiesta" data-hover>La fiesta</a>
-    <a href="#galeria" data-hover>Diseños</a>
+    <a href="#galeria" data-hover>Galería</a>
     <a class="cta-mini" href="#rsvp" data-hover>Confirmar</a>
   </nav>
 </header>
@@ -52,12 +56,12 @@
 
   <!-- HERO -->
   <section class="panel hero" id="hero">
-    <p class="kicker" data-parallax="0.35">Invitación interactiva</p>
+    <p class="kicker" data-parallax="0.35">Cumpleaños legendario · ¡Cumple <span data-config="edad">7 años</span>!</p>
     <h1 data-parallax="0.2">
-      <span class="line">CUMPLEAÑOS</span>
-      <span class="line fire">LEGENDARIO</span>
+      <span class="line">EL CUMPLE DE</span>
+      <span class="line fire">LEONARDO</span>
     </h1>
-    <p class="sub" data-parallax="0.5">Una fiesta de fuego con <strong>Charizard</strong> como invitado de honor.</p>
+    <p class="sub" data-parallax="0.5">Una fiesta de fuego con <strong>Charizard</strong> como invitado de honor. ¡Conviértete en un Maestro Pokémon!</p>
     <div class="countdown" id="countdown" data-parallax="0.65" role="timer" aria-label="Cuenta regresiva para la fiesta">
       <div><b data-cd="d">--</b><i>días</i></div>
       <div><b data-cd="h">--</b><i>horas</i></div>
@@ -99,7 +103,7 @@
         <article class="card info" data-parallax="0.5">
           <h3>Dónde</h3>
           <p class="big" data-config="lugar">—</p>
-          <p>Zona de batalla incluida</p>
+          <p><a class="map-link" id="btn-map" href="#" target="_blank" rel="noopener" data-hover>Ver en mapa</a></p>
         </article>
         <article class="card info" data-parallax="0.65">
           <h3>Dress code</h3>
@@ -119,21 +123,25 @@
   <!-- GALERÍA -->
   <section class="panel center tall" id="galeria">
     <div class="stack">
-      <p class="kicker">Bonus · Arte de la fiesta</p>
-      <h2>Diseños de la colección</h2>
-      <p class="lede">Tres diseños creados para la ocasión: carteles, invitaciones y recuerdos. Toca cada uno para verlo en grande.</p>
-      <div class="gallery">
-        <button class="design" data-hover data-full="img/print_dragons.png" data-title="Tres generaciones de dragones">
-          <img src="img/print_dragons.png" alt="Diseño de la fiesta: tres dragones de fuego de distintos tamaños" loading="lazy">
-          <span>Tres generaciones de dragones</span>
+      <p class="kicker">Recuerdos · Fiesta 2025</p>
+      <h2>Galería</h2>
+      <p class="lede">Así se vivió el cumple del año pasado. Toca cada foto para verla en grande.</p>
+      <div class="gallery photos">
+        <button class="design" data-hover data-full="img/fiesta-2025-1.webp" data-title="Ash y Pikachu llegaron a la fiesta">
+          <img src="img/fiesta-2025-1.webp" alt="Leonardo con Ash y Pikachu durante el show de su fiesta" loading="lazy">
+          <span>Ash y Pikachu llegaron a la fiesta</span>
         </button>
-        <button class="design" data-hover data-full="img/print_flame_dragon.png" data-title="Dragón tribal de llamas">
-          <img src="img/print_flame_dragon.png" alt="Diseño de la fiesta: silueta de dragón formada por llamas" loading="lazy">
-          <span>Dragón tribal de llamas</span>
+        <button class="design" data-hover data-full="img/fiesta-2025-2.webp" data-title="El equipo completo">
+          <img src="img/fiesta-2025-2.webp" alt="Los niños posando juntos frente a la mesa de pastel con globos de colores" loading="lazy">
+          <span>El equipo completo</span>
         </button>
-        <button class="design" data-hover data-full="img/print_pokeball_cake.png" data-title="Pokéball pastelera">
-          <img src="img/print_pokeball_cake.png" alt="Diseño de la fiesta: pokéball convertida en pastel de cumpleaños" loading="lazy">
-          <span>Pokéball pastelera</span>
+        <button class="design" data-hover data-full="img/fiesta-2025-3.webp" data-title="¡A bailar con Pikachu!">
+          <img src="img/fiesta-2025-3.webp" alt="Niños bailando en círculo con Ash, Pikachu y la animadora" loading="lazy">
+          <span>¡A bailar con Pikachu!</span>
+        </button>
+        <button class="design" data-hover data-full="img/fiesta-2025-4.webp" data-title="Un abrazo eléctrico">
+          <img src="img/fiesta-2025-4.webp" alt="Pikachu saludando a los invitados en la mesa" loading="lazy">
+          <span>Un abrazo eléctrico</span>
         </button>
       </div>
     </div>
@@ -142,9 +150,10 @@
   <!-- RSVP -->
   <section class="panel center" id="rsvp">
     <div class="stack">
+      <img class="rsvp-cake" src="img/print_pokeball_cake.png" alt="Pokéball convertida en pastel de cumpleaños" loading="lazy">
       <p class="kicker">Última fase · Elige tu respuesta</p>
       <h2>¿Vienes a la batalla?</h2>
-      <p class="lede">Confirma tu asistencia y prepárate para una noche legendaria.</p>
+      <p class="lede">Confirma tu asistencia. ¡No llegues tarde! Te esperamos para atrapar mucha diversión ⚡</p>
       <div class="actions">
         <a class="btn fire" id="btn-wa" href="#" target="_blank" rel="noopener" data-hover>
           <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2Zm5.5 14.2c-.2.7-1.3 1.3-1.9 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.6-1.2-3s.8-2.1 1-2.4c.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .6.5s.8 1.9.8 2c.1.1.1.3 0 .5-.3.6-.6.8-.4 1.1.7 1.2 1.6 2 2.8 2.6.3.2.5.1.7-.1l.9-1c.2-.3.4-.2.7-.1l2 .9c.3.2.5.2.6.4 0 .1 0 .7-.4 1.3Z"/></svg>
@@ -159,11 +168,21 @@
   </section>
 
   <footer class="panel foot">
-    <p>Hecho con fuego y cariño para fans. Página privada de cumpleaños, sin fines comerciales.</p>
+    <img class="foot-photo" src="img/leonardo.webp" alt="Leonardo Elian sonriendo con una corona Pokémon" loading="lazy">
+    <p class="foot-title">¡Te esperamos, Entrenador!</p>
+    <p>Una fiesta para el mejor entrenador Pokémon.</p>
+    <p class="mini">Página privada de cumpleaños, sin fines comerciales.</p>
     <p class="mini">Pokémon y Charizard son marcas de Nintendo · Creatures Inc. · Game Freak inc.</p>
   </footer>
 
 </main>
+
+<!-- Música -->
+<audio id="music" src="audio/pokemon-theme.mp3" loop preload="none"></audio>
+<button class="music-btn" id="music-btn" type="button" aria-pressed="false" aria-label="Reproducir música" data-hover>
+  <svg class="ic-off" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5.6 15H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h1.6l4.7-4.7c.6-.6 1.7-.2 1.7.7v14c0 .9-1.1 1.3-1.7.7L5.6 15ZM17 14l4-4m0 4-4-4"/></svg>
+  <svg class="ic-on" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15.5 8.5a5 5 0 0 1 0 7m2.8-9.9a9 9 0 0 1 0 12.8M5.6 15H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h1.6l4.7-4.7c.6-.6 1.7-.2 1.7.7v14c0 .9-1.1 1.3-1.7.7L5.6 15Z"/></svg>
+</button>
 
 <!-- Lightbox -->
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Vista ampliada del diseño" hidden>
