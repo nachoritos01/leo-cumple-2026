@@ -270,7 +270,7 @@ h1 .fire {
   background: oklch(16% 0.03 255 / 0.85); backdrop-filter: blur(8px);
   border: 1px solid oklch(80% 0.13 190 / 0.5);
   border-radius: 12px; padding: 10px 14px;
-  max-width: 210px; opacity: 0;
+  width: max-content; max-width: min(210px, 46vw); opacity: 0;
 }
 .dex-label b { display: block; font-family: var(--font-display); font-weight: 400; letter-spacing: .05em; color: var(--teal); font-size: 16px; }
 .dex-label i { font-style: normal; font-size: 13px; color: var(--ink-dim); line-height: 1.4; display: block; margin-top: 2px; }
@@ -319,6 +319,35 @@ h1 .fire {
 @media (max-width: 480px) {
   .countdown div { min-width: 64px; }
   .countdown b { font-size: 24px; }
+}
+
+/* ——— Móvil vertical: dejar sitio a Charizard ——— */
+@media (max-width: 900px) and (orientation: portrait) {
+  /* Barra superior opaca: el contenido que pasa por debajo ya no se transparenta */
+  .topbar { padding-block: 12px; background: oklch(12% 0.02 260 / 0.82); backdrop-filter: blur(10px); }
+
+  /* Portada: titular arriba, texto y cuenta abajo, el dragón en el hueco del medio */
+  .hero { justify-content: flex-start; padding-top: 92px; padding-bottom: 84px; gap: 4px; }
+  .hero .kicker { font-size: 11.5px; letter-spacing: .16em; }
+  .hero h1 { font-size: clamp(40px, 12.5vw, 64px); }
+  .hero .sub { margin-top: auto; font-size: 15.5px; line-height: 1.5; }
+  .countdown { margin-top: 16px; width: 100%; gap: 8px; }
+  .countdown div { flex: 1; min-width: 0; padding: 8px 4px; }
+  .countdown b { font-size: 24px; line-height: 1.2; }
+  .countdown i { font-size: 10.5px; letter-spacing: .1em; }
+  /* solo la gota animada: el texto chocaba con el botón de música */
+  .scroll-hint { bottom: 22px; font-size: 0; }
+  .scroll-hint span { height: 34px; }
+
+  /* Fases 01 y 02: la tarjeta baja al pie y Charizard queda visible arriba */
+  .panel.side { align-items: flex-end; padding-bottom: 88px; }
+  .panel.side .card { max-width: none; width: 100%; padding: 20px 22px; }
+  .panel.side .card h2 { font-size: clamp(32px, 9vw, 44px); }
+  .panel.side .card p { font-size: 15px; line-height: 1.5; }
+  /* La Pokédex tiene más recorrido y su tarjeta se queda abajo mientras
+     las etiquetas aparecen una a una en la mitad superior */
+  #pokedex { min-height: 200vh; min-height: 200dvh; }
+  #pokedex .card { position: sticky; bottom: 88px; }
 }
 
 /* ——— Movimiento reducido ——— */

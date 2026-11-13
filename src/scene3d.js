@@ -1,5 +1,6 @@
 // ————— Escena 3D · Cumpleaños Legendario (Charizard) —————
 // Coreografía scroll-driven: rotación 360° → ficha Pokédex → vuelo → regreso final.
+// Charizard está siempre en modo vuelo: aletea en bucle con su animación esquelética.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -26,13 +27,18 @@ const lerp = (a, b, t) => a + (b - a) * t;
 
 const BG = new THREE.Color(0x0a0c12);
 
-// Anclas Pokédex como fracciones del bounding box del modelo (x, y, z)
-// (se ajustan tras inspección visual del render)
+// Modelo animado «charizard waiting his host» (mozyapene, CC BY 4.0), optimizado:
+// solo el tramo de vuelo estacionario, que cierra en bucle a los 13,04 s.
+const CHAR_URL = 'models/charizard-vuelo.glb';
+const CHAR_HEIGHT = 2.7;          // alto normalizado con las alas desplegadas
+const HIPS_BONE = 'Bone_char';    // cadera: referencia para anular la deriva del vuelo
+
+// Anclas Pokédex: huesos del esqueleto, así las etiquetas siguen la animación
 const CHAR_ANCHORS = {
-  wing:  { f: new THREE.Vector3(-0.62, 0.78, -0.05), title: 'Alas ígneas',   text: 'Vuela a más de 1.400 m de altura.' },
-  flame: { f: new THREE.Vector3(-0.30, 0.28,  0.25), title: 'Llama eterna',  text: 'Arde más fuerte cuando está feliz… ¡como hoy!' },
-  fangs: { f: new THREE.Vector3( 0.00, 0.90,  0.30), title: 'Colmillos dracón', text: 'Sonríe para la foto del cumpleaños.' },
-  claws: { f: new THREE.Vector3( 0.28, 0.45,  0.35), title: 'Garras campeón', text: 'Listas para romper la piñata.' },
+  wing:  { bone: 'Bone097_char', title: 'Alas ígneas',   text: 'Vuela a más de 1.400 m de altura.' },
+  flame: { bone: 'Bone026_char', title: 'Llama eterna',  text: 'Arde más fuerte cuando está feliz… ¡como hoy!' },
+  fangs: { bone: 'Bone029_char', title: 'Colmillos dracón', text: 'Sonríe para la foto del cumpleaños.' },
+  claws: { bone: 'Bone075_char', title: 'Garras campeón', text: 'Listas para romper la piñata.' },
 };
 
 export function initScene(canvas) {
@@ -272,40 +278,75 @@ export function initScene(canvas) {
   // ——— Carga de modelos ———
   const loader = new GLTFLoader();
   const state = {
-    progress: 0, target: 0, time: 0,
+    progress: 0, target: 0, time: 0, animTime: 0,
     ready: false, failed: false,
     charBox: null,
   };
+  // Animación de vuelo (se rellena al cargar)
+  const flight = { mixer: null, duration: 1, model: null, hips: null, base: new THREE.Vector3(), hips0: new THREE.Vector3(), tail: null };
+  const tmpV = new THREE.Vector3();
 
   function normalize(obj, targetH) {
-    const box = new THREE.Box3().setFromObject(obj);
+    obj.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(obj, true);
     const size = box.getSize(new THREE.Vector3());
     const s = targetH / (size.y || 1);
     obj.scale.setScalar(s);
-    box.setFromObject(obj);
+    obj.updateMatrixWorld(true);
+    box.setFromObject(obj, true);
     const center = box.getCenter(new THREE.Vector3());
     obj.position.x -= center.x;
     obj.position.z -= center.z;
     obj.position.y -= box.min.y;
-    box.setFromObject(obj);
+    obj.updateMatrixWorld(true);
+    box.setFromObject(obj, true);
     return box;
   }
 
   async function loadModels() {
-    const charGlb = await loader.loadAsync('models/charizard.glb');
+    const charGlb = await loader.loadAsync(CHAR_URL);
 
-    // Charizard
+    // Charizard en vuelo: mixer en la pose inicial antes de medir
     const char = charGlb.scene;
     char.traverse((m) => { if (m.isMesh) { m.frustumCulled = false; } });
-    const cbox = normalize(char, 3.2);
+    const clip = charGlb.animations[0];
+    flight.mixer = new THREE.AnimationMixer(char);
+    flight.mixer.clipAction(clip).play();
+    flight.mixer.setTime(0);
+    flight.duration = clip.duration;
+
+    const cbox = normalize(char, CHAR_HEIGHT);
     charGroup.add(char);
-    charGroup.position.set(0, 1.0, 0);
+    charGroup.position.copy(CHAR_HOME);
     state.charBox = cbox;
-    const cs = cbox.getSize(new THREE.Vector3());
-    for (const def of Object.values(anchors)) {
-      def.obj.position.set(def.f.x * cs.x, cbox.min.y + def.f.y * cs.y, def.f.z * cs.z);
+    flight.model = char;
+    flight.base.copy(char.position);
+
+    const bone = (name) => char.getObjectByName(name);
+    flight.hips = bone(HIPS_BONE);
+    flight.tail = bone(CHAR_ANCHORS.flame.bone);
+    charGroup.updateMatrixWorld(true);
+    if (flight.hips) charGroup.worldToLocal(flight.hips.getWorldPosition(flight.hips0));
+    for (const [k, def] of Object.entries(CHAR_ANCHORS)) {
+      const b = bone(def.bone);
+      if (b) anchors[k].obj = b;
     }
-    console.log('[scene] charizard bbox', JSON.stringify(cs));
+    console.log('[scene] charizard bbox', JSON.stringify(cbox.getSize(new THREE.Vector3())), 'loop', clip.duration.toFixed(2));
+  }
+
+  // Avanza el vuelo y anula la deriva horizontal de la cadera,
+  // para que Charizard aletee en su sitio y la coreografía mande
+  function updateFlight(t) {
+    if (!flight.mixer) return;
+    flight.mixer.setTime(t % flight.duration);
+    const m = flight.model;
+    m.position.copy(flight.base);
+    if (!flight.hips) return;
+    charGroup.updateMatrixWorld(true);
+    charGroup.worldToLocal(flight.hips.getWorldPosition(tmpV)).sub(flight.hips0);
+    m.position.x -= tmpV.x;
+    m.position.z -= tmpV.z;
+    m.position.y -= tmpV.y * 0.6;   // conserva parte del sube y baja del aleteo
   }
 
   // ——— Recorrido de cámara alineado con las secciones del scroll ———
@@ -338,10 +379,24 @@ export function initScene(canvas) {
     );
   }
 
-  const CHAR_HOME = new THREE.Vector3(0, 1.0, 0);
+  const CHAR_HOME = new THREE.Vector3(0, 1.25, 0);   // en el aire, sobre el disco de fuego
+  // En la portada horizontal se aparta a la derecha para no tapar el titular
+  const HERO_SHIFT = new THREE.Vector3(1.55, 0.35, -1.25);
+  const dbg = (k, v) => (window.__dbg && window.__dbg[k] !== undefined ? window.__dbg[k] : v);
   const CHAR_FAR = new THREE.Vector3(4.2, 3.6, -5.5);
   const CHAR_CAMEO = new THREE.Vector3(3.4, 2.7, -3.2);
   const CHAR_CAMEO_P = new THREE.Vector3(1.5, 3.0, -2.0); // cameo en pantallas verticales
+  // Desplazamiento vertical del encuadre en pantallas verticales (fracción del alto;
+  // positivo sube la escena): portada → hueco entre titular y cuenta regresiva,
+  // fases 01–02 → mitad superior, encima de la tarjeta; luego vuelve al centro
+  const SHIFT_HERO = 0.04;
+  const SHIFT_SIDE = 0.12;
+  let viewShift = null;
+  function portraitShift(p) {
+    const hero = dbg('shiftHero', SHIFT_HERO);
+    const side = dbg('shiftSide', SHIFT_SIDE);
+    return lerp(hero, side, smooth(0.04, 0.16, p)) * (1 - smooth(0.46, 0.58, p));
+  }
   const dummy = new THREE.Object3D();
   const camPos = new THREE.Vector3();
   const camTgt = new THREE.Vector3();
@@ -355,10 +410,26 @@ export function initScene(canvas) {
     camPos.x += Math.sin(time * 0.5) * 0.06 * wob;
     camPos.y += Math.sin(time * 0.7) * 0.05 * wob;
     if (portrait) {
-      camPos.sub(camTgt).multiplyScalar(1.38).add(camTgt);
+      // alejamiento extra: en la portada para que quepa entre titular y texto,
+      // y en las fases 01–02 porque la cámara se acerca mucho y cortaba alas y cabeza
+      const extra = lerp(dbg('zoomHero', 0.22), dbg('zoomSide', 0.45), smooth(0.06, 0.16, p))
+        * (1 - smooth(0.46, 0.58, p));
+      camPos.sub(camTgt).multiplyScalar(1.38 + extra).add(camTgt);
     }
     camera.position.copy(camPos);
     camera.lookAt(camTgt);
+    // En vertical el texto ocupa arriba y abajo de la pantalla: se desplaza el
+    // encuadre (sin cambiar la perspectiva) para que Charizard caiga en el hueco libre
+    if (portrait) {
+      const shift = portraitShift(p);
+      if (viewShift === null || Math.abs(shift - viewShift) > 1e-4) {
+        viewShift = shift;
+        camera.setViewOffset(innerWidth, innerHeight, 0, shift * innerHeight, innerWidth, innerHeight);
+      }
+    } else if (viewShift !== null) {
+      viewShift = null;
+      camera.clearViewOffset();
+    }
 
     // Charizard: rotación 360° (0.10→0.26), vuelo de salida (0.48→0.62),
     // regreso triunfal para el RSVP (0.82→0.94)
@@ -366,17 +437,37 @@ export function initScene(canvas) {
     const drift = smooth(0.26, 1, p) * 0.9;
     const flyOut = smooth(0.48, 0.62, p);
     const flyBack = smooth(0.82, 0.94, p);
-    charGroup.rotation.y = spin + drift;
+    // giro de 3/4 hacia la cámara en portada y de perfil en la ficha Pokédex (se ve la cola)
+    const yawHero = dbg('yawHero', 0.55) * (1 - smooth(0.06, 0.14, p));
+    const yawDex = dbg('yawDex', -0.9) * smooth(0.26, 0.32, p) * (1 - smooth(0.46, 0.52, p));
+    charGroup.rotation.y = spin + drift + yawHero + yawDex;
     charGroup.rotation.z = flyOut * (1 - flyBack) * 0.3;
     charGroup.position.lerpVectors(CHAR_HOME, CHAR_FAR, flyOut);
     charGroup.position.lerp(portrait ? CHAR_CAMEO_P : CHAR_CAMEO, flyBack);
+    if (!portrait) charGroup.position.addScaledVector(HERO_SHIFT, 1 - smooth(0.04, 0.14, p));
     charGroup.position.y += Math.sin(time * 1.4) * 0.07 * wob;
+    // Final: gira desde donde esté hasta mirar a la cámara (antes acababa enseñando la cola).
+    // Se toma el camino más corto y se deja un leve 3/4 para que no quede plano.
+    const faceIn = smooth(0.84, 0.96, p);
+    if (faceIn > 0) {
+      const faceYaw = Math.atan2(camPos.x - charGroup.position.x, camPos.z - charGroup.position.z) + dbg('yawEnd', 0.25);
+      let d = (faceYaw - charGroup.rotation.y) % (Math.PI * 2);
+      if (d > Math.PI) d -= Math.PI * 2;
+      if (d < -Math.PI) d += Math.PI * 2;
+      charGroup.rotation.y += d * faceIn;
+    }
     const cScale = (1 - flyOut * 0.6) + flyBack * 0.25;
     charGroup.scale.setScalar(Math.max(cScale, 0.001));
+    updateFlight(state.animTime);
 
-    // Luz de fuego
+    // Luz de fuego: nace de la llama de la cola
     fireLight.intensity = 10 + Math.sin(time * 13) * 2.2 * wob + smooth(0.48, 0.64, p) * 7;
-    fireLight.position.copy(charGroup.position).y = Math.max(charGroup.position.y - 0.6, 0.6);
+    if (flight.tail) {
+      flight.tail.getWorldPosition(fireLight.position);
+      fireLight.position.y = Math.max(fireLight.position.y, 0.6);
+    } else {
+      fireLight.position.copy(charGroup.position).y = Math.max(charGroup.position.y - 0.6, 0.6);
+    }
 
     // Brasas
     emberUniforms.uTime.value = time;
@@ -385,6 +476,8 @@ export function initScene(canvas) {
     // Disco de fuego (se atenúa para dar aire a la galería y el RSVP)
     const glowPulse = 1 + Math.sin(time * 2.2) * 0.05 * wob;
     glow.scale.setScalar(glowPulse * (1 + smooth(0.48, 0.64, p) * 0.25));
+    glow.position.x = charGroup.position.x * (1 - flyOut);
+    glow.position.z = charGroup.position.z * (1 - flyOut);
     glow.material.opacity = (0.3 + smooth(0.48, 0.64, p) * 0.2) * (1 - smooth(0.64, 0.78, p) * 0.5);
 
     // Sombra de Charizard
@@ -434,12 +527,18 @@ export function initScene(canvas) {
     const dt = Math.min(clock.getDelta(), 0.05);
     state.time += dt;
     state.progress += (state.target - state.progress) * Math.min(1, dt * 4.5);
+    // aleteo más rápido mientras sale volando (0.48→0.62) y vuelve a su ritmo al regresar
+    const p = state.progress;
+    const hurry = smooth(0.46, 0.56, p) * (1 - smooth(0.62, 0.74, p));
+    state.animTime += dt * (1 + hurry * 0.7);
     apply(state.progress, state.time, true);
     render();
   }
 
   function resize() {
     camera.aspect = innerWidth / innerHeight;
+    viewShift = null;          // el encuadre vertical se recalcula con las nuevas medidas
+    camera.clearViewOffset();
     camera.updateProjectionMatrix();
     renderer.setSize(innerWidth, innerHeight);
     composer.setSize(innerWidth, innerHeight);
@@ -452,6 +551,7 @@ export function initScene(canvas) {
     setTarget(p) { state.target = Math.min(1, Math.max(0, p)); },
     seek(p) {
       state.target = state.progress = Math.min(1, Math.max(0, p));
+      state.animTime = 0;
       apply(state.progress, state.progress * 40, false);
       render();
     },

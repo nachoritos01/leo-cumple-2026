@@ -71,9 +71,28 @@ try {
 setTimeout(() => $('#loader').classList.add('done'), 9000);
 
 // ——— Progreso de scroll → escena ———
+// La coreografía está afinada en escritorio, donde cada panel mide una pantalla.
+// En móvil las tarjetas se apilan y las secciones crecen, así que el progreso
+// global se desfasa (las etiquetas Pokédex caían sobre «Detalles de la fiesta»).
+// Ahí se ancla cada sección al progreso que tiene en escritorio.
+const MOBILE_MQ = matchMedia('(max-width: 900px)');
+const SECTION_P = [0, 0.164, 0.329, 0.493, 0.657, 0.882];   // inicio de cada panel en escritorio
+const sections = $$('main > section');
 function scrollProgress() {
   const max = document.documentElement.scrollHeight - innerHeight;
-  return max > 0 ? scrollY / max : 0;
+  if (max <= 0) return 0;
+  if (!MOBILE_MQ.matches || sections.length !== SECTION_P.length) return scrollY / max;
+  const y = scrollY;
+  const tops = sections.map((s) => Math.min(s.offsetTop, max));
+  for (let i = tops.length - 1; i >= 0; i--) {
+    if (y >= tops[i]) {
+      const y1 = i + 1 < tops.length ? tops[i + 1] : max;
+      const p1 = i + 1 < tops.length ? SECTION_P[i + 1] : 1;
+      const t = y1 > tops[i] ? (y - tops[i]) / (y1 - tops[i]) : 1;
+      return SECTION_P[i] + (p1 - SECTION_P[i]) * Math.min(1, t);
+    }
+  }
+  return 0;
 }
 let ticking = false;
 const heroPanel = $('.hero');
@@ -95,8 +114,19 @@ addEventListener('scroll', onScroll, { passive: true });
 // Corre en bucle continuo: el rect incluye la transformación anterior,
 // así que necesita varios frames para converger (no basta un evento de scroll)
 const parallaxEls = $$('[data-parallax]').map((el) => ({ el, speed: parseFloat(el.dataset.parallax) }));
+// En móvil se desactiva: con las tarjetas apiladas, cada una a su velocidad,
+// se montaban unas sobre otras y empujaba la cuenta regresiva fuera del hueco
+let parallaxOff = false;
 function parallax() {
   if (reduceMotion) return;
+  if (MOBILE_MQ.matches) {
+    if (!parallaxOff) {
+      for (const { el } of parallaxEls) el.style.transform = '';
+      parallaxOff = true;
+    }
+    return;
+  }
+  parallaxOff = false;
   const mid = innerHeight / 2;
   for (const { el, speed } of parallaxEls) {
     const r = el.getBoundingClientRect();
@@ -128,34 +158,53 @@ const LABELS = [
   return { ...def, div, line, dot, filled: false };
 });
 const FADE_OUT = 0.48;
+const dexCard = $('#pokedex .card');
+// Turnos en móvil: de 0.30 a 0.41, cuando la tarjeta fija de la Pokédex empieza a subir
+const MOBILE_AT0 = 0.30, MOBILE_STEP = 0.027;
 
 function updateLabels() {
   if (!scene || !scene.anchors) return;
   const p = scene.progress;
-  for (const lb of LABELS) {
+  // En móvil no caben las cuatro a la vez: se muestran de una en una
+  // y siempre por encima de la tarjeta de la Pokédex
+  const narrow = MOBILE_MQ.matches;
+  let maxY = innerHeight;
+  let room = 1;   // se apagan si la tarjeta sube y no deja sitio encima
+  if (narrow) {
+    const cardTop = dexCard.getBoundingClientRect().top;
+    maxY = Math.min(maxY, cardTop - 10);
+    room = Math.min(1, Math.max(0, (cardTop / innerHeight - 0.3) / 0.15));
+  }
+  LABELS.forEach((lb, i) => {
     const anchor = scene.anchors[lb.key];
-    if (!anchor) continue;
+    if (!anchor) return;
     if (!lb.filled) {
       lb.div.innerHTML = `<b>${anchor.title}</b><i>${anchor.text}</i>`;
       lb.filled = true;
     }
-    const fadeIn = Math.min(1, Math.max(0, (p - lb.at) / 0.035));
-    const fadeOut = 1 - Math.min(1, Math.max(0, (p - FADE_OUT) / 0.05));
-    const op = fadeIn * fadeOut;
+    // en móvil el turno de cada etiqueta acaba antes de que la tarjeta empiece a subir
+    const at = narrow ? MOBILE_AT0 + i * MOBILE_STEP : lb.at;
+    const end = narrow ? at + MOBILE_STEP : FADE_OUT;
+    const fadeIn = Math.min(1, Math.max(0, (p - at) / (narrow ? 0.008 : 0.035)));
+    const fadeOut = 1 - Math.min(1, Math.max(0, (p - end) / (narrow ? 0.008 : 0.05)));
+    const op = fadeIn * fadeOut * room;
     const pt = scene.project(anchor.obj);
     const visible = op > 0.01 && !pt.behind;
     lb.div.style.opacity = visible ? op : 0;
     lb.line.style.opacity = visible ? op * 0.9 : 0;
     lb.dot.style.opacity = visible ? op : 0;
-    if (!visible) continue;
-    const lx = pt.x + lb.side[0] * 150;
-    const ly = pt.y + lb.side[1] * 90;
+    if (!visible) return;
+    // la etiqueta se centra en (lx, ly): se mantiene dentro de la pantalla
+    const reach = innerWidth < 600 ? 0.55 : 1;
+    const hw = lb.div.offsetWidth / 2 + 12, hh = lb.div.offsetHeight / 2 + 12;
+    const lx = Math.min(innerWidth - hw, Math.max(hw, pt.x + lb.side[0] * 150 * reach));
+    const ly = Math.min(maxY - hh, Math.max(hh + 64, pt.y + lb.side[1] * 90));
     lb.div.style.left = `${lx}px`;
     lb.div.style.top = `${ly}px`;
     lb.line.setAttribute('x1', pt.x); lb.line.setAttribute('y1', pt.y);
     lb.line.setAttribute('x2', lx);   lb.line.setAttribute('y2', ly);
     lb.dot.setAttribute('cx', pt.x);  lb.dot.setAttribute('cy', pt.y);
-  }
+  });
 }
 (function labelLoop() {
   requestAnimationFrame(labelLoop);
