@@ -386,6 +386,17 @@ export function initScene(canvas) {
   const CHAR_FAR = new THREE.Vector3(4.2, 3.6, -5.5);
   const CHAR_CAMEO = new THREE.Vector3(3.4, 2.7, -3.2);
   const CHAR_CAMEO_P = new THREE.Vector3(1.5, 3.0, -2.0); // cameo en pantallas verticales
+  // Desplazamiento vertical del encuadre en pantallas verticales (fracción del alto;
+  // positivo sube la escena): portada → hueco entre titular y cuenta regresiva,
+  // fases 01–02 → mitad superior, encima de la tarjeta; luego vuelve al centro
+  const SHIFT_HERO = 0.04;
+  const SHIFT_SIDE = 0.12;
+  let viewShift = null;
+  function portraitShift(p) {
+    const hero = dbg('shiftHero', SHIFT_HERO);
+    const side = dbg('shiftSide', SHIFT_SIDE);
+    return lerp(hero, side, smooth(0.04, 0.16, p)) * (1 - smooth(0.46, 0.58, p));
+  }
   const dummy = new THREE.Object3D();
   const camPos = new THREE.Vector3();
   const camTgt = new THREE.Vector3();
@@ -399,10 +410,26 @@ export function initScene(canvas) {
     camPos.x += Math.sin(time * 0.5) * 0.06 * wob;
     camPos.y += Math.sin(time * 0.7) * 0.05 * wob;
     if (portrait) {
-      camPos.sub(camTgt).multiplyScalar(1.38).add(camTgt);
+      // alejamiento extra: en la portada para que quepa entre titular y texto,
+      // y en las fases 01–02 porque la cámara se acerca mucho y cortaba alas y cabeza
+      const extra = lerp(dbg('zoomHero', 0.22), dbg('zoomSide', 0.45), smooth(0.06, 0.16, p))
+        * (1 - smooth(0.46, 0.58, p));
+      camPos.sub(camTgt).multiplyScalar(1.38 + extra).add(camTgt);
     }
     camera.position.copy(camPos);
     camera.lookAt(camTgt);
+    // En vertical el texto ocupa arriba y abajo de la pantalla: se desplaza el
+    // encuadre (sin cambiar la perspectiva) para que Charizard caiga en el hueco libre
+    if (portrait) {
+      const shift = portraitShift(p);
+      if (viewShift === null || Math.abs(shift - viewShift) > 1e-4) {
+        viewShift = shift;
+        camera.setViewOffset(innerWidth, innerHeight, 0, shift * innerHeight, innerWidth, innerHeight);
+      }
+    } else if (viewShift !== null) {
+      viewShift = null;
+      camera.clearViewOffset();
+    }
 
     // Charizard: rotación 360° (0.10→0.26), vuelo de salida (0.48→0.62),
     // regreso triunfal para el RSVP (0.82→0.94)
@@ -419,6 +446,16 @@ export function initScene(canvas) {
     charGroup.position.lerp(portrait ? CHAR_CAMEO_P : CHAR_CAMEO, flyBack);
     if (!portrait) charGroup.position.addScaledVector(HERO_SHIFT, 1 - smooth(0.04, 0.14, p));
     charGroup.position.y += Math.sin(time * 1.4) * 0.07 * wob;
+    // Final: gira desde donde esté hasta mirar a la cámara (antes acababa enseñando la cola).
+    // Se toma el camino más corto y se deja un leve 3/4 para que no quede plano.
+    const faceIn = smooth(0.84, 0.96, p);
+    if (faceIn > 0) {
+      const faceYaw = Math.atan2(camPos.x - charGroup.position.x, camPos.z - charGroup.position.z) + dbg('yawEnd', 0.25);
+      let d = (faceYaw - charGroup.rotation.y) % (Math.PI * 2);
+      if (d > Math.PI) d -= Math.PI * 2;
+      if (d < -Math.PI) d += Math.PI * 2;
+      charGroup.rotation.y += d * faceIn;
+    }
     const cScale = (1 - flyOut * 0.6) + flyBack * 0.25;
     charGroup.scale.setScalar(Math.max(cScale, 0.001));
     updateFlight(state.animTime);
@@ -500,6 +537,8 @@ export function initScene(canvas) {
 
   function resize() {
     camera.aspect = innerWidth / innerHeight;
+    viewShift = null;          // el encuadre vertical se recalcula con las nuevas medidas
+    camera.clearViewOffset();
     camera.updateProjectionMatrix();
     renderer.setSize(innerWidth, innerHeight);
     composer.setSize(innerWidth, innerHeight);
