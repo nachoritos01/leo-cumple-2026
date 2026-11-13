@@ -279,7 +279,7 @@ export function initScene(canvas) {
   const loader = new GLTFLoader();
   const state = {
     progress: 0, target: 0, time: 0, animTime: 0,
-    ready: false, failed: false,
+    ready: false, failed: false, paused: false,
     charBox: null,
   };
   // Animación de vuelo (se rellena al cargar)
@@ -525,6 +525,8 @@ export function initScene(canvas) {
   function loop() {
     rafId = requestAnimationFrame(loop);
     const dt = Math.min(clock.getDelta(), 0.05);
+    // con el minijuego abierto el bucle queda en pausa (el juego cubre la escena)
+    if (state.paused) return;
     state.time += dt;
     state.progress += (state.target - state.progress) * Math.min(1, dt * 4.5);
     // aleteo más rápido mientras sale volando (0.48→0.62) y vuelve a su ritmo al regresar
@@ -542,6 +544,8 @@ export function initScene(canvas) {
     camera.updateProjectionMatrix();
     renderer.setSize(innerWidth, innerHeight);
     composer.setSize(innerWidth, innerHeight);
+    // setSize borra el lienzo: en pausa el bucle no repinta, así que se pinta aquí una vez
+    if (state.paused) render();
   }
   addEventListener('resize', resize);
 
@@ -549,6 +553,7 @@ export function initScene(canvas) {
   const api = {
     anchors,
     setTarget(p) { state.target = Math.min(1, Math.max(0, p)); },
+    setPaused(v) { state.paused = !!v; },
     seek(p) {
       state.target = state.progress = Math.min(1, Math.max(0, p));
       state.animTime = 0;

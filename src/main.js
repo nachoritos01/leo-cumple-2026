@@ -5,12 +5,16 @@ import '@fontsource/space-grotesk/400.css';
 import '@fontsource/space-grotesk/700.css';
 import { CONFIG } from './config.js';
 import { initScene } from './scene3d.js';
+import { setupGame } from './game.js';
 
 window.__APP_ERRORS__ = window.__APP_ERRORS__ || [];
 
 const $ = (s, c = document) => c.querySelector(s);
 const $$ = (s, c = document) => [...c.querySelectorAll(s)];
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const coarsePointer = matchMedia('(hover: none), (pointer: coarse)').matches;
+// con el minijuego abierto la página queda cubierta: etiquetas y parallax dejan de trabajar
+let gameOpen = false;
 
 // ——— Config → DOM ———
 $('[data-config="fecha"]').textContent = CONFIG.fechaTexto;
@@ -136,7 +140,7 @@ function parallax() {
 }
 (function parallaxLoop() {
   requestAnimationFrame(parallaxLoop);
-  parallax();
+  if (!gameOpen) parallax();
 })();
 
 // ——— Etiquetas Pokédex ———
@@ -208,7 +212,7 @@ function updateLabels() {
 }
 (function labelLoop() {
   requestAnimationFrame(labelLoop);
-  updateLabels();
+  if (!gameOpen) updateLabels();
 })();
 
 // ——— Reveal + barras de stats ———
@@ -265,7 +269,7 @@ addEventListener('keydown', (e) => { if (e.key === 'Escape' && !lightbox.hidden)
 
 // ——— Cursor glow ———
 (() => {
-  if (matchMedia('(hover: none), (pointer: coarse)').matches) return;
+  if (coarsePointer) return;
   const cur = $('#cursor');
   let x = innerWidth / 2, y = innerHeight / 2, tx = x, ty = y;
   addEventListener('mousemove', (e) => { tx = e.clientX; ty = e.clientY; }, { passive: true });
@@ -283,3 +287,9 @@ addEventListener('keydown', (e) => { if (e.key === 'Escape' && !lightbox.hidden)
 // ——— Estado inicial ———
 parallax();
 if (scene) scene.setTarget(scrollProgress());
+const game = setupGame({ touch: coarsePointer, reduceMotion });
+// mientras el minijuego está abierto (y cubre la escena con desenfoque) no se renderiza 3D
+game.onOpenChange((isOpen) => {
+  gameOpen = isOpen;
+  if (scene) scene.setPaused(isOpen);
+});
