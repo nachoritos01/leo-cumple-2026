@@ -377,6 +377,7 @@ body.game-open { overflow: hidden; }
 }
 .game-overlay[hidden] { display: none; }
 .game-shell {
+  --game-ch: 160px;   /* hueco vertical reservado fuera del escenario */
   width: min(1020px, 100%);
   display: grid; gap: 12px;
 }
@@ -389,14 +390,28 @@ body.game-open { overflow: hidden; }
 .game-scoreboard b { color: var(--fire-hot); font-weight: 400; margin-left: 6px; }
 .game-best { color: var(--ink-dim); font-size: 15px; align-self: center; }
 .game-best b { color: var(--teal); }
-.game-close {
+.game-combo { color: var(--fire-hot); font-size: 19px; align-self: center; }
+.game-combo[hidden] { display: none; }
+.game-close, .game-pause {
   appearance: none; border: 1px solid var(--line); cursor: pointer;
   width: 42px; height: 42px; border-radius: 50%;
   display: grid; place-content: center;
   background: var(--card); color: var(--ink);
   transition: transform .16s, border-color .16s;
 }
-.game-close:hover, .game-close:focus-visible { transform: scale(1.08); border-color: var(--fire); }
+.game-close:hover, .game-close:focus-visible,
+.game-pause:hover, .game-pause:focus-visible { transform: scale(1.08); border-color: var(--fire); }
+.game-pause-ic {
+  display: block; width: 4px; height: 14px;
+  background: currentColor; box-shadow: 7px 0 0 currentColor;
+}
+.game-pause.on .game-pause-ic {
+  width: 0; height: 0; margin-left: 3px;
+  background: transparent; box-shadow: none;
+  border-left: 12px solid currentColor;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+}
 
 .game-stage {
   position: relative;
@@ -405,6 +420,11 @@ body.game-open { overflow: hidden; }
   overflow: hidden;
   box-shadow: 0 30px 80px oklch(8% 0.02 260 / 0.6);
   aspect-ratio: 16 / 9;
+  /* se dimensiona también por el alto disponible: en apaisado el HUD nunca sale de pantalla */
+  width: min(100%, calc((100vh - var(--game-ch)) * 16 / 9));
+  width: min(100%, calc((100dvh - var(--game-ch)) * 16 / 9));
+  margin-inline: auto;
+  container-type: size;
 }
 #game-canvas {
   width: 100%; height: 100%; display: block;
@@ -414,10 +434,15 @@ body.game-open { overflow: hidden; }
 }
 .game-msg {
   position: absolute; inset: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 14px;
   text-align: center; padding: 24px;
   background: oklch(12% 0.02 260 / 0.62);
+  overflow-y: auto;
 }
+/* centrado con márgenes automáticos: si el contenido no cabe, se desplaza desde arriba en vez de cortarse */
+.game-msg > :first-child { margin-top: auto; }
+.game-msg > :last-child { margin-bottom: auto; }
+.game-msg[hidden] { display: none; }
 .game-msg b {
   font-family: var(--font-display); font-weight: 400;
   font-size: clamp(40px, 8vw, 84px); letter-spacing: .03em; line-height: 1;
@@ -432,6 +457,21 @@ body.game-open { overflow: hidden; }
 .game-help {
   text-align: center; font-size: 13px; letter-spacing: .12em; text-transform: uppercase;
   color: var(--ink-dim);
+}
+
+/* Escenarios bajos (móvil apaisado, ventanas cortas): se libera alto y se compacta el panel */
+@media (max-height: 620px) {
+  .game-shell { --game-ch: 118px; }
+  .game-help { display: none; }
+}
+
+/* Panel de mensajes compacto cuando el propio escenario es bajo (container query) */
+@container (max-height: 280px) {
+  .game-msg { gap: 6px; padding: 8px; }
+  .game-msg b { font-size: clamp(20px, 12cqh, 84px); }
+  .game-msg span { font-size: 13px; }
+  .game-msg .game-final { font-size: 11px; }
+  .game-msg .btn { margin-top: 2px; padding: 8px 16px; font-size: 13px; }
 }
 
 @media (max-width: 640px) {

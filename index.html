@@ -209,9 +209,13 @@
     <header class="game-hud">
       <div class="game-hearts" id="game-hearts" aria-label="Vidas">♥♥♥</div>
       <div class="game-scoreboard">
-        <span>Manzanas <b id="game-score">0</b></span>
+        <span>Puntos <b id="game-score">0</b></span>
         <span class="game-best">Récord <b id="game-best">0</b></span>
+        <span class="game-combo" id="game-combo" hidden></span>
       </div>
+      <button class="game-pause" id="game-pause" type="button" aria-label="Pausar juego">
+        <span class="game-pause-ic" aria-hidden="true"></span>
+      </button>
       <button class="game-close" id="game-close" type="button" aria-label="Cerrar juego" data-hover>
         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M5 5l14 14M19 5L5 19"/></svg>
       </button>
@@ -220,7 +224,7 @@
       <canvas id="game-canvas" width="960" height="540"></canvas>
       <div class="game-msg" id="game-msg" hidden></div>
     </div>
-    <footer class="game-help">ESPACIO / tocar: lanzallamas · P: pausa · ESC: salir</footer>
+    <footer class="game-help" id="game-help">ESPACIO: fuego bajo · ↑/W: fuego alto · P: pausa · ESC: salir</footer>
   </div>
 </div>
 
