@@ -270,7 +270,7 @@ h1 .fire {
   background: oklch(16% 0.03 255 / 0.85); backdrop-filter: blur(8px);
   border: 1px solid oklch(80% 0.13 190 / 0.5);
   border-radius: 12px; padding: 10px 14px;
-  max-width: 210px; opacity: 0;
+  width: max-content; max-width: min(210px, 46vw); opacity: 0;
 }
 .dex-label b { display: block; font-family: var(--font-display); font-weight: 400; letter-spacing: .05em; color: var(--teal); font-size: 16px; }
 .dex-label i { font-style: normal; font-size: 13px; color: var(--ink-dim); line-height: 1.4; display: block; margin-top: 2px; }

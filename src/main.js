@@ -148,8 +148,11 @@ function updateLabels() {
     lb.line.style.opacity = visible ? op * 0.9 : 0;
     lb.dot.style.opacity = visible ? op : 0;
     if (!visible) continue;
-    const lx = pt.x + lb.side[0] * 150;
-    const ly = pt.y + lb.side[1] * 90;
+    // la etiqueta se centra en (lx, ly): se mantiene dentro de la pantalla
+    const reach = innerWidth < 600 ? 0.55 : 1;
+    const hw = lb.div.offsetWidth / 2 + 12, hh = lb.div.offsetHeight / 2 + 12;
+    const lx = Math.min(innerWidth - hw, Math.max(hw, pt.x + lb.side[0] * 150 * reach));
+    const ly = Math.min(innerHeight - hh, Math.max(hh + 64, pt.y + lb.side[1] * 90));
     lb.div.style.left = `${lx}px`;
     lb.div.style.top = `${ly}px`;
     lb.line.setAttribute('x1', pt.x); lb.line.setAttribute('y1', pt.y);
