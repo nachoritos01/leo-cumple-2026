@@ -48,6 +48,7 @@
   <nav>
     <a href="#fiesta" data-hover>La fiesta</a>
     <a href="#galeria" data-hover>Galería</a>
+    <button class="cta-mini game-open-btn" id="btn-game" type="button" data-hover>Jugar</button>
     <a class="cta-mini" href="#rsvp" data-hover>Confirmar</a>
   </nav>
 </header>
@@ -200,6 +201,27 @@
 <div class="webgl-fallback" id="webgl-fallback" hidden>
   <img src="img/print_dragons.png" alt="Ilustración de tres dragones de fuego">
   <p>Tu navegador no pudo iniciar la escena 3D, pero la fiesta sigue en pie: toda la información está aquí abajo.</p>
+</div>
+
+<!-- Minijuego Lanzallamas -->
+<div class="game-overlay" id="game-overlay" role="dialog" aria-modal="true" aria-label="Minijuego Lanzallamas de Charizard" hidden>
+  <div class="game-shell">
+    <header class="game-hud">
+      <div class="game-hearts" id="game-hearts" aria-label="Vidas">♥♥♥</div>
+      <div class="game-scoreboard">
+        <span>Manzanas <b id="game-score">0</b></span>
+        <span class="game-best">Récord <b id="game-best">0</b></span>
+      </div>
+      <button class="game-close" id="game-close" type="button" aria-label="Cerrar juego" data-hover>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M5 5l14 14M19 5L5 19"/></svg>
+      </button>
+    </header>
+    <div class="game-stage">
+      <canvas id="game-canvas" width="960" height="540"></canvas>
+      <div class="game-msg" id="game-msg" hidden></div>
+    </div>
+    <footer class="game-help">ESPACIO / tocar: lanzallamas · P: pausa · ESC: salir</footer>
+  </div>
 </div>
 
 <script type="module" src="./src/main.js"></script>

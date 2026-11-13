@@ -5,6 +5,7 @@ import '@fontsource/space-grotesk/400.css';
 import '@fontsource/space-grotesk/700.css';
 import { CONFIG } from './config.js';
 import { initScene } from './scene3d.js';
+import { setupGame } from './game.js';
 
 window.__APP_ERRORS__ = window.__APP_ERRORS__ || [];
 
@@ -283,3 +284,4 @@ addEventListener('keydown', (e) => { if (e.key === 'Escape' && !lightbox.hidden)
 // ——— Estado inicial ———
 parallax();
 if (scene) scene.setTarget(scrollProgress());
+setupGame();
